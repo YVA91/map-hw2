@@ -24,11 +24,11 @@ public:
     void swap_lock (Data &a, Data &b){
         std::lock(a.m, b.m);
         std::lock_guard(a.m, std::adopt_lock);
+        std::lock_guard(b.m, std::adopt_lock);
         Data c;
         c.x = a.x;
         a.x = b.x;
         b.x = c.x;
-        std::lock_guard(b.m, std::adopt_lock);
     }
 
     void swap_scoped_lock(Data& a, Data& b) {
@@ -40,14 +40,15 @@ public:
     }
 
     void swap_unique_lock(Data& a, Data& b) {
-        std::unique_lock mul1(a.m);
+        std::unique_lock mul1(a.m, std::defer_lock);
+        std::unique_lock mul2(b.m, std::defer_lock);
+        std::lock(mul1, mul2);
         Data c;
         c.x = a.x;
         a.x = b.x;
-        std::unique_lock mul2(b.m);
         b.x = c.x;
-        mul1.unlock();
-        mul2.unlock();
+       
+       
     }
 
 int main()
